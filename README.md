@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # 231009_dev_clicked_template
 The template repository for the data for the 10/09/2023 Developer Sprint for Clicked.
 
@@ -25,7 +24,3 @@ No Salesforce Developer Certifications required for this experience. An added be
 This experience will run from October 9-30th, with sessions after 4 PM PST.
 
 #This 3 week immersive experience is designed to assist you in developing the skills necessary to pass the Salesforce PD1 exam.
-=======
-# clicked_developer_sprint
-Repository for Clicked Sprint with Evelyn Grizzle on 10/09/2023
->>>>>>> refs/remotes/origin/main
