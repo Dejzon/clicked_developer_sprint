@@ -20,8 +20,6 @@ jobs:
       - name: Install Salesforce CLI
         run: npm install --global sfdx-cli
 
-      - name: Install Vlocity
-        run: npm install --global vlocity
 
       - name: Checkout source code
         uses: actions/checkout@v2
