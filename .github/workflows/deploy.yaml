@@ -35,13 +35,7 @@ jobs:
           echo "${SERVER_KEY}" > server.key
           sfdx auth:jwt:grant -f ./server.key -a targetOrg -r https://test.salesforce.com -i "$CONSUMER_KEY" -u "$USERNAME"
 
-      - name: Create delta packages for new, modified or deleted metadata
-        run: >
-          mkdir changed-sources
-
-          sfdx sgd:source:delta --to "HEAD" --from "HEAD^" --output changed-sources/ --generate-delta --source force-app/ 
-      - name: Deployment - run all tests
-        run: >
-          sfdx force:source:deploy -p "changed-sources/force-app"  --testlevel
-          RunLocalTests --json
-
+      - name: Deploy
+        run: |
+          cd main
+          sfdx force:source:deploy -w 30 -l NoTestRun -u targetOrg --manifest metadatadeploy/package.xml --verbose
