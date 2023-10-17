@@ -1,0 +1,44 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+        
+env:
+  USERNAME: ${{secrets.USERNAME}}
+  CONSUMER_KEY: ${{secrets.CONSUMER_KEY}}
+  SERVER_KEY: ${{secrets.SERVER_KEY}}
+  
+jobs:
+  deploy-to-main:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Setup NPM
+        uses: actions/setup-node@v3.0.0
+
+      - name: Install Salesforce CLI
+        run: npm install --global sfdx-cli
+
+      - name: Install Vlocity
+        run: npm install --global vlocity
+
+      - name: Checkout source code
+        uses: actions/checkout@v2
+        with:
+          path: main
+
+      - name: Convert metadata to mdapi format
+        run: |
+          cd main
+          sfdx force:source:convert --sourcepath "force-app" --outputdir metadatadeploy
+
+      - name: Authenticate Org
+        run: |
+          echo "${SERVER_KEY}" > server.key
+          sfdx auth:jwt:grant -f ./server.key -a targetOrg -r https://test.salesforce.com -i "$CONSUMER_KEY" -u "$USERNAME"
+
+      - name: Deploy
+        run: |
+          cd main
+          sfdx force:source:deploy -w 30 -l NoTestRun -u targetOrg --manifest metadatadeploy/package.xml --verbose

@@ -1,0 +1,43 @@
+name: Run unit tests on main
+
+on:
+  pull_request:
+    branches: [main]
+
+env:
+  USERNAME: ${{secrets.USERNAME}}
+  CONSUMER_KEY: ${{secrets.CONSUMER_KEY}}
+  SERVER_KEY: ${{secrets.SERVER_KEY}}
+
+jobs:
+  run-unit-tests-on-main:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Setup NPM
+        uses: actions/setup-node@v3.0.0
+
+      - name: Install Salesforce CLI
+        run: npm install --global sfdx-cli
+                    
+      - name: Checkout source code
+        uses: actions/checkout@v2
+        with:
+          path: main
+
+      - name: Convert metadata to mdapi format
+        run: |
+          cd main
+          sfdx force:source:convert --sourcepath "force-app" --outputdir metadatadeploy
+      - name: Authenticate Org
+        run: |
+          echo "${SERVER_KEY}" > server.key
+          sfdx auth:jwt:grant -f ./server.key -a targetOrg -r https://test.salesforce.com -i "$CONSUMER_KEY" -u "$USERNAME"
+      - name: Validate deploy
+        run: |
+          cd main
+          sfdx force:source:deploy -w 30 -c -l NoTestRun -u targetOrg --manifest metadatadeploy/package.xml --verbose
+
+
+# consumer key: 3MVG9HB6vm3GZZR9NV_KDwkJtM.nJ2JNRdRgRH5m__5vObY2F8_Az.3YaUscbBxvExgIofOnK_jiSDLBQG4oi
+# consumer secret: 84749E26D42293916BF0B1163E1C6C45CCA237C6A6EB12E27BF5543A86C6F5AE
