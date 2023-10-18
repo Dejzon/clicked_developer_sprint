@@ -1,39 +1,38 @@
 name: Deploy
-
 on:
   push:
-    branches: [main]
-        
-env:
-  USERNAME: ${{secrets.USERNAME}}
-  CONSUMER_KEY: ${{secrets.CONSUMER_KEY}}
-  SERVER_KEY: ${{secrets.SERVER_KEY}}
-  
+    paths:
+      - force-app/**
+    branches:
+      - main
 jobs:
-  deploy-to-main:
+  deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
     steps:
-      - name: Setup NPM
-        uses: actions/setup-node@v3.0.0
-
-      - name: Install Salesforce CLI
-        run: npm install --global sfdx-cli
-
-      - name: Checkout source code
-        uses: actions/checkout@v2
+      - uses: actions/setup-node@v3
         with:
-          path: main
+          node-version: "14"
+      - name: Checkout source code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install Salesforce CLI
+        run: >
+          wget
+          https://developer.salesforce.com/media/salesforce-cli/sfdx/channels/stable/sfdx-linux-x64.tar.xz
 
-      - name: Convert metadata to mdapi format
-        run: |
-          cd main
-          sfdx force:source:convert --sourcepath "force-app" --outputdir metadatadeploy
+          mkdir ~/sfdx
 
-      - name: Authenticate Org
-        run: |
-          echo "${SERVER_KEY}" > server.key
-          sfdx auth:jwt:grant -f ./server.key -a targetOrg -r https://test.salesforce.com -i "$CONSUMER_KEY" -u "$USERNAME"
+          tar xJf sfdx-linux-x64.tar.xz -C ~/sfdx --strip-components 1
+
+          echo "$HOME/sfdx/bin" >> $GITHUB_PATH
+
+          ~/sfdx/bin/sfdx version
+      - name: Authenticate to org with JWT
+        run: >-
+          echo ${{secrets.SERVER_KEY}} > server.key
+
+          sfdx force:auth:jwt:grant --clientid=${{secrets.CONSUMER_KEY}} --jwtkeyfile=server.key --username=${{secrets.USERNAME}} -s -a targetOrg --instanceurl=${{secrets.URL}}
       - name: Installing sfdx git delta
         run: |
           echo y | sfdx plugins:install sfdx-git-delta
@@ -43,7 +42,7 @@ jobs:
           mkdir changed-sources
 
           sfdx sgd:source:delta --to "HEAD" --from "HEAD^" --output changed-sources/ --generate-delta --source force-app/ 
-      - name: Deploy
-        run: |
-          cd main
-          sfdx force:source:deploy -w 30 -l NoTestRun -u targetOrg --manifest metadatadeploy/package.xml --verbose
+      - name: Deployment - run all tests
+        run: >
+          sfdx force:source:deploy -p "changed-sources/force-app"  --testlevel
+          RunLocalTests --json
