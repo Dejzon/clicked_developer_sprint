@@ -33,7 +33,7 @@ jobs:
       - name: Authenticate Org
         run: |
           echo "${SERVER_KEY}" > server.key
-          sfdx auth:jwt:grant -f ./server.key -a targetOrg -r https://login.salesforce.com -i "$CONSUMER_KEY" -u "$USERNAME"
+          sfdx auth:jwt:grant -f ./server.key -a targetOrg -r https://login.salesforce.com -i "$CONSUMER_KEY" --username "$USERNAME"
 
       - name: Deploy
         run: |

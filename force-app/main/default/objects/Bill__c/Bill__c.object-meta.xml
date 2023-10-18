@@ -155,8 +155,9 @@
     <externalSharingModel>Private</externalSharingModel>
     <label>Billing</label>
     <nameField>
-        <label>Billing  Name</label>
-        <type>Text</type>
+        <displayFormat>BN-{0000}</displayFormat>
+        <label>Bill Number</label>
+        <type>AutoNumber</type>
     </nameField>
     <pluralLabel>Billings</pluralLabel>
     <searchLayouts></searchLayouts>
