@@ -32,12 +32,11 @@ jobs:
       - name: Authenticate Org
         run: |
           echo "${SERVER_KEY}" > server.key
-          sfdx auth:jwt:grant -f ./server.key -a targetOrg -r https://test.salesforce.com -i "$CONSUMER_KEY" -u "$USERNAME"
+          sfdx auth:jwt:grant -f ./server.key -a targetOrg -r https://login.salesforce.com -i "$CONSUMER_KEY" -u "$USERNAME"
       - name: Validate deploy
         run: |
           cd main
           sfdx force:source:deploy -w 30 -c -l NoTestRun -u targetOrg --manifest metadatadeploy/package.xml --verbose
 
 
-# consumer key: 3MVG9HB6vm3GZZR9NV_KDwkJtM.nJ2JNRdRgRH5m__5vObY2F8_Az.3YaUscbBxvExgIofOnK_jiSDLBQG4oi
-# consumer secret: 84749E26D42293916BF0B1163E1C6C45CCA237C6A6EB12E27BF5543A86C6F5AE
+
