@@ -1,8 +1,6 @@
 name: Deploy
 on:
   push:
-    paths:
-      - force-app/**
     branches:
       - main
 jobs:
@@ -32,7 +30,7 @@ jobs:
         run: >-
           echo ${{secrets.SERVER_KEY}} > server.key
 
-          sfdx force:auth:jwt:grant --clientid=${{secrets.CONSUMER_KEY}} --jwtkeyfile=server.key --username=${{secrets.USERNAME}} -s -a targetOrg --instanceurl=${{secrets.URL}}
+          sfdx force:auth:jwt:grant --clientid=${{secrets.CONSUMER_KEY}} --jwtkeyfile=server.key --username=${{secrets.USERNAME}} -s -a targetOrg -r https://login.salesforce.com
       - name: Installing sfdx git delta
         run: |
           echo y | sfdx plugins:install sfdx-git-delta
