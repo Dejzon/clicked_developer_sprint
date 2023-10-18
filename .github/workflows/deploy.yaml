@@ -11,7 +11,7 @@ jobs:
         with:
           node-version: "14"
       - name: Checkout source code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0
       - name: Install Salesforce CLI
@@ -26,11 +26,10 @@ jobs:
           echo "$HOME/sfdx/bin" >> $GITHUB_PATH
 
           ~/sfdx/bin/sfdx version
-      - name: Authenticate to org with JWT
-        run: >-
-          echo ${{secrets.SERVER_KEY}} > server.key
-
-          sfdx force:auth:jwt:grant --clientid=${{secrets.CONSUMER_KEY}} --jwtkeyfile=server.key --username=${{secrets.USERNAME}} -s -a targetOrg -r https://login.salesforce.com
+      - name: Authenticate Org
+        run: |
+          echo "${SERVER_KEY}" > server.key
+          sfdx auth:jwt:grant -f ./server.key -a targetOrg -r https://login.salesforce.com -i "$CONSUMER_KEY" -u "$USERNAME"
       - name: Installing sfdx git delta
         run: |
           echo y | sfdx plugins:install sfdx-git-delta
